@@ -54,6 +54,8 @@ struct ContentView: View {
                 Text("Conjugate '\(question.infinitive)' in '\(question.tense)' tense for '\(question.pronoun)'")
                     .font(.title2)
                     .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding()
                 
                 TextField("Enter conjugation", text: $userAnswer)
