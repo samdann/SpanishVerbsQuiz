@@ -131,8 +131,10 @@ struct ContentView: View {
                     .padding()
                 
                 TextField("Your answer", text: $userAnswer)
+                    .autocapitalization(.none)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disableAutocorrection(true)
+                
                 //.fixedSize()
                     .frame(maxWidth: .infinity)
                     .textContentType(.none)
@@ -211,11 +213,11 @@ struct ContentView: View {
     }
     
     func checkAnswer() {
-        guard var currentQuestion = currentQuestion,
-        let selectedTense = selectedTense,
-        let selectedQuestionCount = selectedQuestionCount  else { return }
+        guard let currentQuestion = currentQuestion,
+              let selectedTense = selectedTense,
+              let selectedQuestionCount = selectedQuestionCount  else { return }
         print("Checking answer for verb: \(currentQuestion.infinitive), tense: \(currentQuestion.tense), pronoun: \(currentQuestion.pronoun)")
-
+        
         if userAnswer.lowercased().trimmingCharacters(in: .whitespaces) == currentQuestion.correctAnswer {
             feedback = "Correct!"
             correctAnswers += 1
