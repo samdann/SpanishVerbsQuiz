@@ -22,6 +22,8 @@ struct ContentView: View {
     @State private var score: Int = 0
     @State private var verbs: [Verb] = []
     @State private var isLoading: Bool = true
+    @State private var selectedTense: String? = nil
+    @State private var availableTenses: [String] = ["presente", "pretérito perfecto", "pretérito indefinido", "imperfecto", "futuro"]
     
     
     init() {
@@ -46,6 +48,31 @@ struct ContentView: View {
                 ProgressView("Loading verbs...")
                     .progressViewStyle(.circular)
                     .padding()
+            } else if selectedTense == nil {
+                Text("Select a Tense to Practice")
+                    .font(.title)
+                    .padding()
+                
+                ForEach(availableTenses, id: \.self) { tense in
+                    Button(action: {
+                        selectedTense = tense
+                        if let newQuestion = verbs.filter({ $0.tense == tense}).randomElement() {
+                            currentQuestion = newQuestion
+                        } else {
+                            currentQuestion = nil
+                        }
+                    }) {
+                        Text(tense.capitalized)
+                            .font(.title3)
+                            .padding()
+                        //.frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                }
+                Spacer()
             } else if let question = currentQuestion {
                 Text("Spanish Verb Quiz")
                     .font(.largeTitle)
@@ -61,7 +88,8 @@ struct ContentView: View {
                 TextField("Enter conjugation", text: $userAnswer)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disableAutocorrection(true)
-                    .fixedSize()
+                //.fixedSize()
+                    .frame(maxWidth: .infinity)
                     .padding()
                 
                 Button(action: checkAnswer) {
@@ -80,12 +108,38 @@ struct ContentView: View {
                     .font(.title2)
                     .padding()
                 
+                // Button to change tense
+                Button(action: {
+                    selectedTense = nil // Return to tense selection screen
+                    feedback = ""
+                    userAnswer = ""
+                }) {
+                    Text("Change Tense")
+                        .font(.subheadline)
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                }
                 Spacer()
             } else {
-                Text("Error loading verbs")
+                Text("No questions available for \(selectedTense?.capitalized ?? "selected tense")")
                     .font(.title2)
                     .foregroundColor(.red)
                     .padding()
+                
+                Button(action: {
+                    selectedTense = nil // Return to tense selection
+                }) {
+                    Text("Select Another Tense")
+                        .font(.title2)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                
+                Spacer()
             }
         }
         .padding()
