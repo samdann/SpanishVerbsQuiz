@@ -29,6 +29,8 @@ struct ContentView: View {
     @State private var questionsAnswered: Int = 0
     @State private var availableTenses: [String] = ["presente", "pretérito perfecto", "pretérito indefinido", "imperfecto", "futuro"]
     @State private var avaialbleQuestionCounts: [Int] = [5, 10, 20]
+    @State private var answerResults: [Bool?] = [] // Tracks nil (unanswered), true (correct), false (incorrect)
+    
     
     init() {
         _currentQuestion = State(initialValue: Verb(infinitive: "dejar", tense: "present", pronoun: "yo", correctAnswer: "dejo"))
@@ -36,11 +38,13 @@ struct ContentView: View {
         do {
             let loadedVerbs = try loadVerbsFromFile()
             _verbs = State(initialValue: loadedVerbs)
+            _answerResults = State(initialValue: [])
             if let firstVerb = loadedVerbs.randomElement() {
                 _currentQuestion = State(initialValue: firstVerb)
             }
         } catch {
             _verbs = State(initialValue: [])
+            _answerResults = State(initialValue: [])
             print("Error loading verbs: \(error)")
         }
     }
@@ -61,6 +65,7 @@ struct ContentView: View {
                 ForEach(availableTenses, id: \.self) { tense in
                     Button(action: {
                         selectedTense = tense
+                        answerResults = []
                         if let newQuestion = verbs.filter({ $0.tense == tense}).randomElement() {
                             currentQuestion = newQuestion
                         } else {
@@ -70,7 +75,6 @@ struct ContentView: View {
                         Text(tense.capitalized)
                             .font(.title3)
                             .padding()
-                        //.frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
@@ -87,6 +91,7 @@ struct ContentView: View {
                 ForEach(avaialbleQuestionCounts, id: \.self){ count in
                     Button(action: {
                         selectedQuestionCount = count
+                        answerResults = Array(repeating: nil, count: count) // Initialize blocks
                         if let newQuestion = verbs.filter({$0.tense == selectedTense}).randomElement() {
                             currentQuestion = newQuestion
                         } else {
@@ -96,7 +101,6 @@ struct ContentView: View {
                         Text("\(count)")
                             .font(.title2)
                             .padding()
-                        //.frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
@@ -108,6 +112,7 @@ struct ContentView: View {
                     questionsAnswered = 0
                     correctAnswers = 0
                     incorrectAnswers = 0
+                    answerResults = []
                 }) {
                     Text("Change Tense")
                         .font(.subheadline)
@@ -152,9 +157,16 @@ struct ContentView: View {
                     .font(.title3)
                     .foregroundColor(feedback.contains("Correct") ? .green : .red)
                 
-                Text("Score: \(correctAnswers)/\(selectedQuestionCount!) correct, \(incorrectAnswers)/\(selectedQuestionCount!) incorrect (\(selectedQuestionCount!) questions)")
-                    .font(.title2)
-                    .padding()
+                // Visual score display
+                HStack(spacing: 8) {
+                    ForEach(0..<answerResults.count, id: \.self) { index in
+                        Rectangle()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(answerResults[index] == nil ? .white : (answerResults[index]! ? .green : .red))
+                            .border(Color.gray, width: 1)
+                    }
+                }
+                .padding()
                 
                 // Button to change tense
                 Button(action: {
@@ -165,6 +177,7 @@ struct ContentView: View {
                     incorrectAnswers = 0
                     feedback = ""
                     userAnswer = ""
+                    answerResults = []
                 }) {
                     Text("Change Tense or Questions")
                         .font(.subheadline)
@@ -181,9 +194,17 @@ struct ContentView: View {
                     .foregroundColor(questionsAnswered >= selectedQuestionCount! ? .blue : .red)
                     .padding()
                 
-                Text("Final Score: \(correctAnswers)/\(selectedQuestionCount!) correct, \(incorrectAnswers)/\(selectedQuestionCount!) incorrect (\(selectedQuestionCount!) questions)")
-                    .font(.title2)
-                    .padding()
+                // Visual score display
+                HStack(spacing: 8) {
+                    ForEach(0..<answerResults.count, id: \.self) { index in
+                        Rectangle()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(answerResults[index] == nil ? .white : (answerResults[index]! ? .green : .red))
+                            .border(Color.gray, width: 1)
+                    }
+                }
+                .padding()
+                
                 
                 Button(action: {
                     selectedTense = nil
@@ -216,6 +237,8 @@ struct ContentView: View {
               let selectedTense = selectedTense,
               let selectedQuestionCount = selectedQuestionCount  else { return }
         print("Checking answer for verb: \(currentQuestion.infinitive), tense: \(currentQuestion.tense), pronoun: \(currentQuestion.pronoun)")
+        let isCorrect = userAnswer.lowercased().trimmingCharacters(in: .whitespaces) == currentQuestion.correctAnswer
+
         
         if userAnswer.lowercased().trimmingCharacters(in: .whitespaces) == currentQuestion.correctAnswer {
             feedback = "Correct!"
@@ -225,6 +248,7 @@ struct ContentView: View {
             incorrectAnswers += 1
         }
         
+        answerResults[questionsAnswered] = isCorrect
         questionsAnswered += 1
         
         // Load new question if not at the limit
