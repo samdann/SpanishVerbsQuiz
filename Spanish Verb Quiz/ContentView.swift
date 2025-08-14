@@ -123,12 +123,11 @@ struct ContentView: View {
                     .font(.title)
                     .padding()
                 
-                Text("Conjugate '\(question.infinitive)' in '\(question.tense)' tense for '\(question.pronoun)'")
-                    .font(.title2)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding()
+                (Text("\(selectedQuestionCount  ?? 5)").bold() +  Text(" questions in the ") + Text("\(selectedTense ?? "")").bold() + Text(" tense."))
+                    .modifier(CustomTextStyle())
+                
+                (Text("Conjugate ") + Text("\(question.infinitive)").bold().italic() + Text(" for") + Text(" \(question.pronoun)").bold().italic())
+                    .modifier(CustomTextStyle())
                 
                 TextField("Your answer", text: $userAnswer)
                     .autocapitalization(.none)
@@ -281,5 +280,14 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct CustomTextStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .multilineTextAlignment(.center)
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
