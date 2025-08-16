@@ -15,7 +15,7 @@ struct QuestionCountView: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("How Many Questions?")
-                .font(.largeTitle)
+                .font(.title)
                 .padding()
             
             ForEach(availableQuestionCounts, id: \.self) { count in

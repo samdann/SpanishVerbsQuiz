@@ -15,6 +15,8 @@ struct QuizView: View {
     let incorrectAnswers: Int
     let selectedQuestionCount: Int
     let answerResults: [Bool?]
+    let availableTenses: [String]
+    let verbs: [Verb]
     let onSubmit: () -> Void
     let onChangeTenseOrQuestions: () -> Void
     
@@ -28,8 +30,18 @@ struct QuizView: View {
             (Text("\(selectedQuestionCount)").bold() +  Text(" questions in the ") + Text("\(selectedTense)").bold() + Text(" tense."))
                 .modifier(CustomTextStyle())
             
-            (Text("Conjugate ") + Text("\(question.infinitive)").bold().italic() + Text(" for") + Text(" \(question.pronoun)").bold().italic())
-                .modifier(CustomTextStyle())
+            HStack {
+                Text("Conjugate ")
+                NavigationLink(destination: VerbStudyView(infinitive: question.infinitive, verbs: verbs, availableTenses: availableTenses)) {
+                   Text(question.infinitive)
+                       .font(.title2)
+                       .foregroundColor(.blue)
+                       .underline()
+               }
+                Text(" for") + Text(" \(question.pronoun)").bold().italic()
+            }
+             
+             
             
             TextField("Your answer", text: $userAnswer)
                 .autocapitalization(.none)
@@ -81,8 +93,22 @@ struct QuizView_Previews: PreviewProvider {
             incorrectAnswers: 1,
             selectedQuestionCount: 5,
             answerResults: [true, false, nil, nil, nil],
+            availableTenses: ["presente", "futuro"],
+            verbs: [
+                Verb(infinitive: "hablar", tense: "presente", pronoun: "yo", correctAnswer: "hablo")
+            ],
             onSubmit: {},
             onChangeTenseOrQuestions: {}
         )
+    }
+}
+
+
+struct CustomTextStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .multilineTextAlignment(.center)
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }

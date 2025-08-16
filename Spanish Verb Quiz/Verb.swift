@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Verb: Codable {
+struct Verb: Codable, Hashable {
     let infinitive: String
     let tense: String
     let pronoun: String

@@ -14,7 +14,7 @@ struct TenseSelectionView: View {
         var body: some View {
             VStack(spacing: 20) {
                 Text("Select a Tense to Practice")
-                    .font(.largeTitle)
+                    .font(.title)
                     .padding()
                 
                 ForEach(availableTenses, id: \.self) { tense in

@@ -12,57 +12,64 @@ struct ContentView: View {
     
     
     var body: some View {
-        VStack(spacing: 20) {
-            
-            if viewModel.isLoading {
-                ProgressView("Loading verbs...")
-                    .progressViewStyle(.circular)
-                    .padding()
-            } else if viewModel.selectedTense == nil {
-                TenseSelectionView(
-                    availableTenses: viewModel.availableTenses,
-                    onTenseSelected: { tense in
-                        viewModel.selectTense(tense)
-                    }
-                )
-            } else if viewModel.selectedQuestionCount == nil {
-                QuestionCountView(
-                    availableQuestionCounts: viewModel.availableQuestionCounts,
-                    onQuestionCountSelected: { count in
-                        viewModel.selectQuestionCount(count)
-                    },
-                    onChangeTense: {
-                        viewModel.resetQuiz()
-                    }
-                )
-            } else if let question = viewModel.currentQuestion, viewModel.questionsAnswered < viewModel.selectedQuestionCount! {
-                QuizView(
-                    question: question,
-                    userAnswer: $viewModel.userAnswer,
-                    feedback: $viewModel.feedback,
-                    selectedTense: viewModel.selectedTense!,
-                    correctAnswers: viewModel.correctAnswers,
-                    incorrectAnswers: viewModel.incorrectAnswers,
-                    selectedQuestionCount: viewModel.selectedQuestionCount!,
-                    answerResults: viewModel.answerResults,
-                    onSubmit: {
-                        viewModel.checkAnswer()
-                    },
-                    onChangeTenseOrQuestions: {
-                        viewModel.resetQuiz()
-                    }
-                )
-            } else {
-                QuizCompletionView(
-                    correctAnswers: viewModel.correctAnswers,
-                    incorrectAnswers: viewModel.incorrectAnswers,
-                    selectedQuestionCount: viewModel.selectedQuestionCount!,
-                    answerResults: viewModel.answerResults,
-                    onStartNewQuiz: {
-                        viewModel.resetQuiz()
-                    }
-                )
+        NavigationStack{
+            VStack(spacing: 20) {
+                
+                if viewModel.isLoading {
+                    ProgressView("Loading verbs...")
+                        .progressViewStyle(.circular)
+                        .padding()
+                } else if viewModel.selectedTense == nil {
+                    TenseSelectionView(
+                        availableTenses: viewModel.availableTenses,
+                        onTenseSelected: { tense in
+                            viewModel.selectTense(tense)
+                        }
+                    )
+                } else if viewModel.selectedQuestionCount == nil {
+                    QuestionCountView(
+                        availableQuestionCounts: viewModel.availableQuestionCounts,
+                        onQuestionCountSelected: { count in
+                            viewModel.selectQuestionCount(count)
+                        },
+                        onChangeTense: {
+                            viewModel.resetQuiz()
+                        }
+                    )
+                } else if let question = viewModel.currentQuestion, viewModel.questionsAnswered < viewModel.selectedQuestionCount! {
+                    QuizView(
+                        question: question,
+                        userAnswer: $viewModel.userAnswer,
+                        feedback: $viewModel.feedback,
+                        selectedTense: viewModel.selectedTense!,
+                        correctAnswers: viewModel.correctAnswers,
+                        incorrectAnswers: viewModel.incorrectAnswers,
+                        selectedQuestionCount: viewModel.selectedQuestionCount!,
+                        answerResults: viewModel.answerResults,
+                        availableTenses: viewModel.availableTenses,
+                        verbs: viewModel.verbs,
+                        onSubmit: {
+                            viewModel.checkAnswer()
+                        },
+                        onChangeTenseOrQuestions: {
+                            viewModel.resetQuiz()
+                        }
+                    )
+                } else {
+                    QuizCompletionView(
+                        correctAnswers: viewModel.correctAnswers,
+                        incorrectAnswers: viewModel.incorrectAnswers,
+                        selectedQuestionCount: viewModel.selectedQuestionCount!,
+                        answerResults: viewModel.answerResults,
+                        onStartNewQuiz: {
+                            viewModel.resetQuiz()
+                        }
+                    )
+                }
             }
+            .navigationTitle("Spanish Verb Quiz")
+            .navigationBarTitleDisplayMode(.inline)
+            
         }
         .onAppear {
             viewModel.loadVerbsAsync()
@@ -77,11 +84,3 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-struct CustomTextStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .multilineTextAlignment(.center)
-            .lineLimit(nil)
-            .fixedSize(horizontal: false, vertical: true)
-    }
-}
