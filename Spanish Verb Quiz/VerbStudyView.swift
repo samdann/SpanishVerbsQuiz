@@ -11,6 +11,8 @@ struct VerbStudyView: View {
     let infinitive: String
     let verbs: [Verb]
     let availableTenses: [String]
+    let pronounOrder = ["yo", "tú", "él/ella/usted", "nosotros", "vosotros", "ellos/ellas/ustedes"]
+    
     
     private var filterVerbs: [Verb] {
         verbs.filter { $0.infinitive == infinitive }
@@ -24,24 +26,34 @@ struct VerbStudyView: View {
             }
     }
     
+    
     var body: some View {
-        List {
-            Section(header: Text(infinitive.capitalized).font(.title2)) {
-                ForEach(filterVerbs, id: \.self) { verb in
-                    HStack {
-                        Text("\(verb.tense.capitalized) (\(verb.pronoun))")
-                            .font(.subheadline)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer()
-                        Text(verb.correctAnswer)
-                            .font(.subheadline)
-                            .foregroundColor(.blue)
+        // Move groupedVerbs outside the view builder
+        let groupedVerbs = Dictionary(grouping: filterVerbs, by: { $0.tense })
+        //List {
+            
+                List {
+                    Text(infinitive.capitalized).font(.title)
+                    ForEach(availableTenses, id: \.self) { tense in
+                        Section(header: Text(tense)) {
+                            ForEach(groupedVerbs[tense]!.sorted(by: { pronounOrder.firstIndex(of: $0.pronoun)! < pronounOrder.firstIndex(of: $1.pronoun)! }), id: \.correctAnswer) { verb in
+                                HStack {
+                                    Text("\(verb.pronoun)")
+                                        .font(.subheadline)
+                                        .lineLimit(nil)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Spacer()
+                                    Text(verb.correctAnswer)
+                                        .font(.subheadline)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
                     }
-                    .padding(.vertical, 2)
                 }
-            }
-        }
+            
+        //}
         .navigationTitle("Study \(infinitive.capitalized)")
         .navigationBarTitleDisplayMode(.inline)
     }
